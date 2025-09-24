@@ -1,7 +1,15 @@
 <template>
   <div id="app">
-    <el-container>
+    <!-- 登录页面 -->
+    <router-view v-if="$route.path === '/login'" />
+    
+    <!-- 主应用布局 -->
+    <el-container v-else>
       <el-aside width="200px" class="sidebar">
+        <div class="sidebar-header">
+          <h3>问卷调查系统</h3>
+        </div>
+        
         <el-menu
           :default-active="$route.path"
           class="sidebar-menu"
@@ -27,6 +35,18 @@
             <span>删除问卷</span>
           </el-menu-item>
         </el-menu>
+        
+        <div class="sidebar-footer">
+          <el-button 
+            type="danger" 
+            size="small" 
+            @click="handleLogout"
+            class="logout-btn"
+          >
+            <el-icon><SwitchButton /></el-icon>
+            退出登录
+          </el-button>
+        </div>
       </el-aside>
       
       <el-main class="main-content">
@@ -37,7 +57,38 @@
 </template>
 
 <script setup lang="ts">
-import { Plus, List, View, Delete } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, List, View, Delete, SwitchButton } from '@element-plus/icons-vue'
+
+const router = useRouter()
+
+// 退出登录
+const handleLogout = async () => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要退出登录吗？',
+      '退出确认',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    // 清除登录状态
+    localStorage.removeItem('isLoggedIn')
+    localStorage.removeItem('username')
+    
+    ElMessage.success('已退出登录')
+    
+    // 跳转到登录页
+    router.push('/login')
+  } catch (error) {
+    // 用户取消退出
+  }
+}
+
 </script>
 
 <style scoped>
@@ -48,11 +99,35 @@ import { Plus, List, View, Delete } from '@element-plus/icons-vue'
 .sidebar {
   background-color: #304156;
   height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid #3c4a5c;
+}
+
+.sidebar-header h3 {
+  color: #fff;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .sidebar-menu {
   border-right: none;
-  height: 100%;
+  flex: 1;
+}
+
+.sidebar-footer {
+  padding: 20px;
+  border-top: 1px solid #3c4a5c;
+}
+
+.logout-btn {
+  width: 100%;
+  justify-content: center;
 }
 
 .main-content {
